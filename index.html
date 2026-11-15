@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das Sandmännchen und die Reise ins Blaue</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:'Trebuchet MS',sans-serif;
+    background:linear-gradient(180deg,#07173b,#123b7a);
+    color:white;
+    overflow-x:hidden;
+    min-height:100vh;
+}
+
+/* Hintergrund */
+
+.sky{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+}
+
+.star{
+    position:absolute;
+    color:#fff7b2;
+    animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+    from{opacity:.2;}
+    to{opacity:1;}
+}
+
+.cloud{
+    position:absolute;
+    font-size:60px;
+    opacity:.4;
+    animation:cloudmove linear infinite;
+}
+
+@keyframes cloudmove{
+    from{transform:translateX(-200px);}
+    to{transform:translateX(calc(100vw + 200px));}
+}
+
+/* Container */
+
+.container{
+    max-width:900px;
+    margin:30px auto;
+    background:rgba(255,255,255,0.10);
+    border-radius:25px;
+    padding:25px;
+    backdrop-filter:blur(8px);
+    box-shadow:0 0 20px rgba(0,0,0,.4);
+}
+
+/* Sandmännchen */
+
+.sandman{
+    font-size:90px;
+    animation:float 3s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-15px);}
+    100%{transform:translateY(0);}
+}
+
+h1,h2{
+    color:#ffdf5e;
+}
+
+/* Fortschritt */
+
+.progress{
+    width:100%;
+    height:24px;
+    background:#243d6d;
+    border-radius:15px;
+    overflow:hidden;
+    margin-bottom:20px;
+}
+
+.progress-fill{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#f7d21b,#ff8c00);
+    transition:1s;
+}
+
+/* Koffer */
+
+.suitcase{
+    font-size:55px;
+    margin:15px;
+}
+
+#packed{
+    font-size:32px;
+    min-height:40px;
+}
+
+/* Buttons */
+
+button{
+    width:100%;
+    padding:15px;
+    margin:10px 0;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    background:white;
+    font-size:18px;
+    font-weight:bold;
+    transition:.2s;
+}
+
+button:hover{
+    transform:scale(1.03);
+    background:#ffe47a;
+}
+
+#message{
+    margin-top:15px;
+    font-size:1.2rem;
+}
+
+#timer{
+    margin-top:10px;
+    font-size:2.2rem;
+    color:#ffcc66;
+}
+
+/* Flugzeug */
+
+#plane{
+    position:fixed;
+    top:90px;
+    left:-150px;
+    font-size:50px;
+    animation:fly 18s linear infinite;
+}
+
+@keyframes fly{
+    from{
+        transform:translateX(0);
+    }
+    to{
+        transform:translateX(calc(100vw + 250px));
+    }
+}
+
+/* Sternenregen */
+
+.sparkle{
+    position:fixed;
+    font-size:30px;
+    animation:fall 2s linear forwards;
+}
+
+@keyframes fall{
+    from{
+        opacity:1;
+        transform:translateY(-80px);
+    }
+    to{
+        opacity:0;
+        transform:translateY(600px);
+    }
+}
+
+.sleep{
+    font-size:100px;
+    animation:sleepAnim 1s infinite;
+}
+
+@keyframes sleepAnim{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.08);}
+    100%{transform:scale(1);}
+}
+
+.question-image{
+    font-size:90px;
+    margin:10px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="sky" id="sky"></div>
+
+<div id="plane">✈️</div>
+
+<div class="container">
+
+<div style="text-align:center">
+<div class="sandman">🌙👴✨</div>
+
+<div class="suitcase">
+🧳
+<div id="packed"></div>
+</div>
+
+<div class="progress">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+</div>
+
+<div id="game"></div>
+
+<div id="message"></div>
+<div id="timer"></div>
+
+</div>
+
+<script>
+
+/* Sterne erzeugen */
+
+for(let i=0;i<50;i++){
+ let star=document.createElement("div");
+ star.className="star";
+ star.innerHTML="⭐";
+ star.style.left=Math.random()*100+"vw";
+ star.style.top=Math.random()*100+"vh";
+ star.style.fontSize=(10+Math.random()*25)+"px";
+ star.style.animationDuration=(1+Math.random()*3)+"s";
+ document.getElementById("sky").appendChild(star);
+}
+
+/* Wolken */
+
+for(let i=0;i<5;i++){
+ let c=document.createElement("div");
+ c.className="cloud";
+ c.innerHTML="☁️";
+ c.style.top=(30+i*90)+"px";
+ c.style.animationDuration=(30+i*10)+"s";
+ document.getElementById("sky").appendChild(c);
+}
+
+/* Fragen */
+
+const packedIcons=["👖","🩳","✈️","☀️","🥾"];
+
+const pages=[
+
+{
+intro:true,
+title:"Das Sandmännchen und die Reise ins Blaue",
+text:"Das Sandmännchen hat eine harte Nacht hinter sich. Hilf ihm sich wieder zu erinnern, damit es gut für die Reise vorbereitet ist.<br><br>Du kannst jeweils zwischen drei Antworten wählen. Wählst du die falsche Antwort, so streut es dir Sand in deine Augen und du legst ein kleines Schläfchen ein."
+},
+
+{
+image:"👖",
+q:"Welche Hose muss ich einpacken?",
+a:["Kurze Hose","Lange Hose","Lange Unterhose"],
+c:1
+},
+
+{
+image:"🏊",
+q:"Welche Dinge brauche ich auf der Reise?",
+a:["Mückenspray","Skibrille","Badehose"],
+c:2
+},
+
+{
+image:"✈️",
+q:"Wie möchte das Sandmännchen verreisen?",
+a:["Zug","Flugzeug","PKW"],
+c:1
+},
+
+{
+image:"☀️",
+q:"Was durfte das Sandmännchen am 11. April 2026 in Kappel-Grafenhausen spüren?",
+a:["5°C","15°C","20°C"],
+c:2
+},
+
+{
+image:"🥾",
+q:"Welche Dinge brauche ich auf gar keinen Fall?",
+a:["Wanderschuhe","Zahnbürste","Sonnenbrille"],
+c:0
+}
+
+];
+
+let page=0;
+
+/* Sternenregen */
+
+function starsRain(){
+
+for(let i=0;i<15;i++){
+
+let star=document.createElement("div");
+star.className="sparkle";
+star.innerHTML="⭐";
+star.style.left=Math.random()*100+"vw";
+
+document.body.appendChild(star);
+
+setTimeout(()=>star.remove(),2000);
+}
+}
+
+function updateProgress(){
+
+let percent=Math.max(0,(page)/(pages.length-1))*100;
+
+document.getElementById("progressFill").style.width=
+percent+"%";
+}
+
+function render(){
+
+updateProgress();
+
+document.getElementById("message").innerHTML="";
+document.getElementById("timer").innerHTML="";
+
+if(page===0){
+
+document.getElementById("game").innerHTML=`
+<h1>${pages[0].title}</h1>
+<p style="font-size:1.2rem;line-height:1.7;">
+${pages[0].text}
+</p>
+<button onclick="startGame()">Spiel starten</button>
+`;
+
+return;
+}
+
+if(page>pages.length-1){
+finish();
+return;
+}
+
+const p=pages[page];
+
+let html=`
+<div style="text-align:center">
+<div class="question-image">${p.image}</div>
+<h2>Frage ${page} von ${pages.length-1}</h2>
+<h2>${p.q}</h2>
+`;
+
+p.a.forEach((answer,index)=>{
+html+=`
+<button onclick="answer(${index})">
+${answer}
+</button>`;
+});
+
+html+="</div>";
+
+document.getElementById("game").innerHTML=html;
+}
+
+function startGame(){
+
+page=1;
+document.getElementById("packed").innerHTML="";
+render();
+
+}
+
+function answer(choice){
+
+const p=pages[page];
+
+if(choice===p.c){
+
+starsRain();
+
+document.getElementById("packed").innerHTML+=
+packedIcons[page-1]+" ";
+
+document.getElementById("message").innerHTML=
+"✅ Richtig! Das Sandmännchen erinnert sich wieder besser.";
+
+setTimeout(()=>{
+page++;
+render();
+},1500);
+
+}else{
+
+sleepMode();
+}
+}
+
+function sleepMode(){
+
+document.getElementById("game").innerHTML=`
+<div class="sleep">
+😴
+</div>
+
+<h2>Das Sandmännchen hat dir Sand in die Augen gestreut!</h2>
+
+<p>
+Du musst nun ein kleines Schläfchen machen und anschließend von vorne beginnen.
+</p>
+`;
+
+let sec=30;
+
+document.getElementById("timer").innerHTML=
+sec+" Sekunden";
+
+const countdown=setInterval(()=>{
+
+sec--;
+
+document.getElementById("timer").innerHTML=
+sec+" Sekunden";
+
+if(sec<=0){
+
+clearInterval(countdown);
+
+page=0;
+
+document.getElementById("packed").innerHTML="";
+
+render();
+}
+
+},1000);
+}
+
+function finish(){
+
+document.getElementById("progressFill").style.width="100%";
+
+document.getElementById("game").innerHTML=`
+
+<h1>🎉 Geschafft!</h1>
+
+<div style="font-size:130px;">
+🌙👴✈️🏝️
+</div>
+
+<p style="font-size:1.4rem;line-height:1.8;">
+Vielen Dank lieber Partey Pipel!<br><br>
+Du hast mir sehr geholfen mich für meine Reise vorzubereiten!
+</p>
+
+<h2>Im Gepäck sind nun:</h2>
+
+<div style="font-size:50px;">
+👖 🩳 ✈️ ☀️
+</div>
+
+<button onclick="restart()">
+Nochmal spielen
+</button>
+`;
+}
+
+function restart(){
+
+page=0;
+document.getElementById("packed").innerHTML="";
+render();
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
